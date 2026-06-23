@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MathMastery: Year 5 Global Edition with Scratchpad</title>
+    <title>MathMastery: Year 5 Global Edition</title>
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -31,7 +31,7 @@
         .subtitle {
             text-align: center;
             color: #7f8c8d;
-            margin-bottom: 20px;
+            margin-bottom: 30px;
             font-size: 0.95em;
             font-weight: 500;
         }
@@ -54,7 +54,7 @@
             background-color: #ecf0f1;
             border-radius: 10px;
             height: 12px;
-            margin-bottom: 25px;
+            margin-bottom: 30px;
             overflow: hidden;
         }
         .progress-fill {
@@ -73,7 +73,6 @@
             display: flex;
             flex-direction: column;
             gap: 14px;
-            margin-bottom: 25px;
         }
         .option-btn {
             background-color: #fff;
@@ -90,43 +89,6 @@
             background-color: #f8f9fa;
             border-color: #bdc3c7;
             transform: translateY(-1px);
-        }
-        /* Scratchpad Styles */
-        .scratchpad-area {
-            margin-top: 25px;
-            border-top: 2px dashed #e2e8f0;
-            padding-top: 20px;
-        }
-        .scratchpad-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 10px;
-            font-weight: 600;
-            font-size: 0.95em;
-            color: #7f8c8d;
-        }
-        .clear-btn {
-            background-color: #e74c3c;
-            color: white;
-            border: none;
-            padding: 6px 12px;
-            font-size: 0.85em;
-            border-radius: 6px;
-            cursor: pointer;
-            font-weight: bold;
-            transition: background 0.2s;
-        }
-        .clear-btn:hover {
-            background-color: #c0392b;
-        }
-        canvas {
-            border: 2px solid #cbd5e1;
-            border-radius: 8px;
-            background-color: #fafbfc;
-            cursor: crosshair;
-            display: block;
-            touch-action: none; /* Prevents mobile gesture interference */
         }
         .feedback {
             margin-top: 25px;
@@ -195,14 +157,6 @@
             <div id="options" class="options-container"></div>
         </div>
 
-        <div class="scratchpad-area">
-            <div class="scratchpad-header">
-                <span>📝 Visual Scratchpad (Sketch models or formulas here)</span>
-                <button class="clear-btn" onclick="clearScratchpad()">Clear Pad</button>
-            </div>
-            <canvas id="scratchpad"></canvas>
-        </div>
-
         <div id="feedback" class="feedback"></div>
         <button id="next-button" class="next-btn" onclick="nextQuestion()">Next Challenge →</button>
     </div>
@@ -246,74 +200,10 @@
     let score = 0;
     let hasAnswered = false;
 
-    // Canvas Variables
-    const canvas = document.getElementById("scratchpad");
-    const ctx = canvas.getContext("2d");
-    let isDrawing = false;
-
-    function initCanvas() {
-        // Set fixed resolution matching container dimensions securely
-        canvas.width = canvas.parentElement.clientWidth;
-        canvas.height = 180; 
-        
-        ctx.strokeStyle = "#2980b9"; // Clean blueprint-blue ink
-        ctx.lineWidth = 3;
-        ctx.lineCap = "round";
-        ctx.lineJoin = "round";
-
-        // Desktop Mouse Event Listeners
-        canvas.addEventListener("mousedown", startDrawing);
-        canvas.addEventListener("mousemove", draw);
-        canvas.addEventListener("mouseup", stopDrawing);
-        canvas.addEventListener("mouseleave", stopDrawing);
-
-        // Mobile/Tablet Touch Event Listeners
-        canvas.addEventListener("touchstart", startDrawing);
-        canvas.addEventListener("touchmove", draw);
-        canvas.addEventListener("touchend", stopDrawing);
-    }
-
-    function getCoordinates(e) {
-        const rect = canvas.getBoundingClientRect();
-        // Handle both touch coordinates and standard mouse coordinates
-        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-        const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-        return {
-            x: clientX - rect.left,
-            y: clientY - rect.top
-        };
-    }
-
-    function startDrawing(e) {
-        isDrawing = true;
-        const coords = getCoordinates(e);
-        ctx.beginPath();
-        ctx.moveTo(coords.x, coords.y);
-        if(e.touches) e.preventDefault(); // Prevents page standard bounce on touch
-    }
-
-    function draw(e) {
-        if (!isDrawing) return;
-        const coords = getCoordinates(e);
-        ctx.lineTo(coords.x, coords.y);
-        ctx.stroke();
-        if(e.touches) e.preventDefault();
-    }
-
-    function stopDrawing() {
-        isDrawing = false;
-        ctx.closePath();
-    }
-
-    function clearScratchpad() {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-    }
-
     function loadQuestion() {
         hasAnswered = false;
         document.getElementById("feedback").style.display = "none";
         document.getElementById("next-button").style.display = "none";
-        clearScratchpad(); // Clean sheet for the next question challenge!
         
         const currentQuiz = quizData[currentQuestionIdx];
         document.getElementById("question").innerText = currentQuiz.question;
@@ -382,11 +272,7 @@
         loadQuestion();
     }
 
-    // App Initialization
-    window.onload = () => {
-        initCanvas();
-        loadQuestion();
-    };
+    loadQuestion();
 </script>
 
 </body>
