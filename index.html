@@ -88,4 +88,306 @@
         }
         .option-btn:hover {
             background-color: #f8f9fa;
-            border-color: #bd
+            border-color: #bdc3c7;
+            transform: translateY(-1px);
+        }
+        /* Scratchpad Styles */
+        .scratchpad-area {
+            margin-top: 25px;
+            border-top: 2px dashed #e2e8f0;
+            padding-top: 20px;
+        }
+        .scratchpad-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            font-weight: 600;
+            font-size: 0.95em;
+            color: #7f8c8d;
+        }
+        .clear-btn {
+            background-color: #e74c3c;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            font-size: 0.85em;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background 0.2s;
+        }
+        .clear-btn:hover {
+            background-color: #c0392b;
+        }
+        canvas {
+            border: 2px solid #cbd5e1;
+            border-radius: 8px;
+            background-color: #fafbfc;
+            cursor: crosshair;
+            display: block;
+            touch-action: none; /* Prevents mobile gesture interference */
+        }
+        .feedback {
+            margin-top: 25px;
+            padding: 18px;
+            border-radius: 10px;
+            line-height: 1.5;
+            display: none;
+        }
+        .feedback.correct {
+            background-color: #e8f5e9;
+            color: #2e7d32;
+            border: 1px solid #c8e6c9;
+        }
+        .feedback.incorrect {
+            background-color: #ffebee;
+            color: #c62828;
+            border: 1px solid #ffcdd2;
+        }
+        .next-btn {
+            display: block;
+            width: 100%;
+            background-color: #2c3e50;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            padding: 14px;
+            font-size: 1.1em;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 25px;
+            display: none;
+            transition: background 0.2s;
+        }
+        .next-btn:hover {
+            background-color: #1a252f;
+        }
+        .score-screen {
+            text-align: center;
+            display: none;
+        }
+        .score-screen h2 {
+            color: #2e7d32;
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="app-container">
+    <div id="quiz-section">
+        <h1>MathMastery</h1>
+        <div class="subtitle">An Advanced Blended Curriculum (AU & VN)</div>
+        
+        <div class="badge-container">
+            <span class="badge aus">🇦🇺 Critical Thinking</span>
+            <span class="badge vnm">🇻🇳 Analytical Modeling</span>
+        </div>
+        
+        <div class="progress-bar">
+            <div id="progress" class="progress-fill"></div>
+        </div>
+
+        <div class="question-card">
+            <div id="question" class="question-text">Loading question...</div>
+            <div id="options" class="options-container"></div>
+        </div>
+
+        <div class="scratchpad-area">
+            <div class="scratchpad-header">
+                <span>📝 Visual Scratchpad (Sketch models or formulas here)</span>
+                <button class="clear-btn" onclick="clearScratchpad()">Clear Pad</button>
+            </div>
+            <canvas id="scratchpad"></canvas>
+        </div>
+
+        <div id="feedback" class="feedback"></div>
+        <button id="next-button" class="next-btn" onclick="nextQuestion()">Next Challenge →</button>
+    </div>
+
+    <div id="score-section" class="score-screen">
+        <h2>Outstanding Mastery! 🌟</h2>
+        <p id="final-score" style="font-size: 1.2em; margin-bottom: 25px;"></p>
+        <button class="next-btn" style="display:inline-block; width:auto; padding: 14px 40px;" onclick="restartQuiz()">Restart Challenge</button>
+    </div>
+</div>
+
+<script>
+    const quizData = [
+        {
+            question: "1. [Ratio Model] Two schools ordered a total of 120 new laptops. School A ordered 3 times as many laptops as School B. How many laptops did School A order?",
+            options: ["30 laptops", "40 laptops", "80 laptops", "90 laptops"],
+            answer: 3,
+            explanation: "Excellent logical modeling! Think of this as 4 equal parts total (3 parts for School A + 1 part for School B). One part is 120 ÷ 4 = 30. Since School A has 3 parts, they receive 30 × 3 = 90 laptops."
+        },
+        {
+            question: "2. [Motion Problem] Two cyclists start at the exact same time from places 45 km apart and ride toward each other. Cyclist A travels at 8 km/h and Cyclist B travels at 7 km/h. How many hours will it take for them to meet?",
+            options: ["3 hours", "5 hours", "6 hours", "15 hours"],
+            answer: 0,
+            explanation: "Brilliant! This is a classic Vietnamese motion formula. Every hour, they close the gap by their combined speed: 8 + 7 = 15 km/h. To cover the 45 km distance, it will take them 45 ÷ 15 = 3 hours."
+        },
+        {
+            question: "3. [Advanced Percentage] In a Year 5 cohort of 200 students, 54% of the students are girls. How many boys are in the cohort?",
+            options: ["92 boys", "108 boys", "46 boys", "146 boys"],
+            answer: 0,
+            explanation: "Spot on! If 54% are girls, then the remaining percentage must be boys: 100% - 54% = 46%. To find the total number of boys, calculate 46% of 200, which is 0.46 × 200 = 92 boys."
+        },
+        {
+            question: "4. [Geometry/Measurement] A triangular garden bed next to a playground has a base of 14 metres and a vertical height of 8 metres. What is the total area of the garden?",
+            options: ["22 square metres", "56 square metres", "112 square metres", "44 square metres"],
+            answer: 1,
+            explanation: "Perfect! The area of a triangle is calculated using the formula: (Base × Height) ÷ 2. For this garden, (14 × 8) ÷ 2 = 112 ÷ 2 = 56 square metres."
+        }
+    ];
+
+    let currentQuestionIdx = 0;
+    let score = 0;
+    let hasAnswered = false;
+
+    // Canvas Variables
+    const canvas = document.getElementById("scratchpad");
+    const ctx = canvas.getContext("2d");
+    let isDrawing = false;
+
+    function initCanvas() {
+        // Set fixed resolution matching container dimensions securely
+        canvas.width = canvas.parentElement.clientWidth;
+        canvas.height = 180; 
+        
+        ctx.strokeStyle = "#2980b9"; // Clean blueprint-blue ink
+        ctx.lineWidth = 3;
+        ctx.lineCap = "round";
+        ctx.lineJoin = "round";
+
+        // Desktop Mouse Event Listeners
+        canvas.addEventListener("mousedown", startDrawing);
+        canvas.addEventListener("mousemove", draw);
+        canvas.addEventListener("mouseup", stopDrawing);
+        canvas.addEventListener("mouseleave", stopDrawing);
+
+        // Mobile/Tablet Touch Event Listeners
+        canvas.addEventListener("touchstart", startDrawing);
+        canvas.addEventListener("touchmove", draw);
+        canvas.addEventListener("touchend", stopDrawing);
+    }
+
+    function getCoordinates(e) {
+        const rect = canvas.getBoundingClientRect();
+        // Handle both touch coordinates and standard mouse coordinates
+        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+        const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+        return {
+            x: clientX - rect.left,
+            y: clientY - rect.top
+        };
+    }
+
+    function startDrawing(e) {
+        isDrawing = true;
+        const coords = getCoordinates(e);
+        ctx.beginPath();
+        ctx.moveTo(coords.x, coords.y);
+        if(e.touches) e.preventDefault(); // Prevents page standard bounce on touch
+    }
+
+    function draw(e) {
+        if (!isDrawing) return;
+        const coords = getCoordinates(e);
+        ctx.lineTo(coords.x, coords.y);
+        ctx.stroke();
+        if(e.touches) e.preventDefault();
+    }
+
+    function stopDrawing() {
+        isDrawing = false;
+        ctx.closePath();
+    }
+
+    function clearScratchpad() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+    }
+
+    function loadQuestion() {
+        hasAnswered = false;
+        document.getElementById("feedback").style.display = "none";
+        document.getElementById("next-button").style.display = "none";
+        clearScratchpad(); // Clean sheet for the next question challenge!
+        
+        const currentQuiz = quizData[currentQuestionIdx];
+        document.getElementById("question").innerText = currentQuiz.question;
+        
+        const optionsContainer = document.getElementById("options");
+        optionsContainer.innerHTML = "";
+        
+        currentQuiz.options.forEach((option, index) => {
+            const button = document.createElement("button");
+            button.className = "option-btn";
+            button.innerText = option;
+            button.onclick = () => checkAnswer(index);
+            optionsContainer.appendChild(button);
+        });
+
+        const progressPercent = (currentQuestionIdx / quizData.length) * 100;
+        document.getElementById("progress").style.width = progressPercent + "%";
+    }
+
+    function checkAnswer(selectedIndex) {
+        if (hasAnswered) return;
+        hasAnswered = true;
+
+        const currentQuiz = quizData[currentQuestionIdx];
+        const feedbackEl = document.getElementById("feedback");
+        const buttons = document.getElementsByClassName("option-btn");
+
+        if (selectedIndex === currentQuiz.answer) {
+            score++;
+            feedbackEl.className = "feedback correct";
+            feedbackEl.innerText = currentQuiz.explanation;
+            buttons[selectedIndex].style.backgroundColor = "#e8f5e9";
+            buttons[selectedIndex].style.borderColor = "#4caf50";
+        } else {
+            feedbackEl.className = "feedback incorrect";
+            feedbackEl.innerText = "Keep learning! The correct path was: " + currentQuiz.options[currentQuiz.answer] + ". " + currentQuiz.explanation;
+            buttons[selectedIndex].style.backgroundColor = "#ffebee";
+            buttons[selectedIndex].style.borderColor = "#f44336";
+            buttons[currentQuiz.answer].style.backgroundColor = "#e8f5e9";
+        }
+
+        feedbackEl.style.display = "block";
+        document.getElementById("next-button").style.display = "block";
+    }
+
+    function nextQuestion() {
+        currentQuestionIdx++;
+        if (currentQuestionIdx < quizData.length) {
+            loadQuestion();
+        } else {
+            showScore();
+        }
+    }
+
+    function showScore() {
+        document.getElementById("quiz-section").style.display = "none";
+        document.getElementById("score-section").style.display = "block";
+        document.getElementById("final-score").innerText = `You successfully mastered ${score} out of ${quizData.length} global challenges!`;
+    }
+
+    function restartQuiz() {
+        currentQuestionIdx = 0;
+        score = 0;
+        document.getElementById("quiz-section").style.display = "block";
+        document.getElementById("score-section").style.display = "none";
+        loadQuestion();
+    }
+
+    // App Initialization
+    window.onload = () => {
+        initCanvas();
+        loadQuestion();
+    };
+</script>
+
+</body>
+</html>
